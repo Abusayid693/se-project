@@ -1,6 +1,10 @@
 import express from "express";
 import db from "./db.config";
+import {errorHandler} from './middleware/error';
 
+// Routes
+import authRouter from "./routes/auth"
+import productRouter from "./routes/product"
 
 db.initialize()
   .then(() => {
@@ -14,16 +18,10 @@ const app = express();
 
 app.use(express.json());
 
-app.get("/", (req, res) => res.send("Server is running successfully"));
+app.use("/auth", authRouter);
+app.use("/product", productRouter);
 
-app.get("/test", async (req, res) => {
-    const result = await db.query(
-        `select * from dbms_project_user;
-          `
-      );
-
-      console.log('result :', result)
-});
+app.use(errorHandler);
 
 const server = app.listen(4000, () => {
   console.log(`Timezones by location application is running on port ${4000}.`);
