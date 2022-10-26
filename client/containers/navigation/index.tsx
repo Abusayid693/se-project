@@ -1,9 +1,11 @@
-import { Button, Heading, HStack } from "@chakra-ui/react";
+import { Button, Heading, HStack, Avatar, Text, Image } from "@chakra-ui/react";
 import Link from "next/link";
 import { useAuth } from "../../contexts/auth";
+import { useCart } from "../../contexts/cart";
 
 export const Navigation = () => {
-  const { isAuthenticated, currentUser } = useAuth();
+  const { isAuthenticated, currentUser, logout } = useAuth();
+  const { cart } = useCart();
 
   return (
     <HStack
@@ -22,9 +24,23 @@ export const Navigation = () => {
         <HStack>
           <Link href={"/login"}>
             {" "}
-            <Button>{currentUser.username}</Button>
+            <HStack>
+              <Avatar src="https://bit.ly/broken-link" />{" "}
+              <Text fontSize={"19px"}>{currentUser.username} </Text>
+            </HStack>
           </Link>
-          <Button>Log out</Button>
+          <Link href={"/cart"}>
+            <Button
+              bg="#0c4ff7"
+              color="white"
+              _hover={{
+                opacity: ".8",
+              }}
+            >
+              <Image src="/icons/cart.svg" /> {Object.keys(cart.items).length}
+            </Button>
+          </Link>
+          <Button onClick={logout}>Log out</Button>
         </HStack>
       ) : (
         <HStack>
