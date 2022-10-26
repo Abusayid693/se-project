@@ -2,30 +2,43 @@ import React, { createContext, useContext, useState } from "react";
 
 const CheckoutContext = createContext<any>(null);
 
+export const CART = 0;
+export const ADDRESSES = 1;
+export const ADD_NEW_ADDDRESS = 2;
+export const CONFIRM_ORDER = 3;
+export const ORDER_SUCCESSFULL = 4;
+
 export function useCheckout() {
   return useContext(CheckoutContext);
 }
 
+const initialState = {
+    navigation: 0,
+    addressId: null,
+  }
+
 export const CheckoutProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  const [state, setState] = useState({
-    navigation: 0,
-    addressId: null,
-  });
+  const [state, setState] = useState(initialState);
 
-  const proceedNavigation = () => {
-    setState((prev) => ({ ...prev, navigation: prev.navigation + 1 }));
+  const setNavigation = (index:any) => {
+    setState((prev) => ({ ...prev, navigation: index }));
   };
 
-  const backNavigation = () => {
-    setState((prev) => ({ ...prev, navigation: prev.navigation - 1 }));
-  };
+  const setAddressId = (id:any) =>{
+    setState((prev) => ({ ...prev, addressId: id }));
+  }
+
+  const reset = () =>{
+    setState(initialState)
+  }
 
   const values = {
     ...state,
-    proceedNavigation,
-    backNavigation,
+    setNavigation,
+    setAddressId,
+    reset
   };
 
   return (

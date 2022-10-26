@@ -16,6 +16,7 @@ export const Navigation = () => {
       bg="white"
       justifyContent={"space-between"}
       px="15px"
+      zIndex={1000}
     >
       <Link href={"/"}>
         <Heading>E-commerce</Heading>
@@ -39,6 +40,9 @@ export const Navigation = () => {
             >
               <Image src="/icons/cart.svg" /> {Object.keys(cart.items).length}
             </Button>
+          </Link>
+          <Link href={"/orders"}>
+          <Button >orders</Button>
           </Link>
           <Button onClick={logout}>Log out</Button>
         </HStack>

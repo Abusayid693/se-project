@@ -19,7 +19,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
     setCart((prev) => ({
       ...prev,
       items: { ...prev.items, [item.id]: item },
-      totalAmount: Number(item?.price),
+      totalAmount: prev.totalAmount + Number(item?.price),
     }));
   };
 

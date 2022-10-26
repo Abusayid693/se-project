@@ -55,7 +55,44 @@ export const order = async (
     });
     res.status(200).json({
       success: true,
-      data: `Order with id:${orderId} successfully placed `,
+      data: {
+        message: `Order with id:${orderId} successfully placed `,
+        orderId,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const orderedItems = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  //  @ts-ignore
+  const userId = req.user.id;
+
+  try {
+    let result = await db.query(
+      `select dbms_project_order_items.id, 
+      orderId,
+      dbms_project_products.name,
+      dbms_project_products.description,
+      dbms_project_products.price,
+      dbms_project_products.image_link
+      from  dbms_project_order_items 
+
+      inner join dbms_project_products on
+      dbms_project_order_items.productId = dbms_project_products.id
+
+      where dbms_project_order_items.userId = "${userId}" 
+      order by orderId asc;`
+    );
+
+    res.status(200).json({
+      success: true,
+      data: result,
     });
   } catch (error) {
     next(error);

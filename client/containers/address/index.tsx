@@ -1,123 +1,153 @@
-import { Formik, Form } from "formik";
-import { Input, VStack, Button, Text, Heading } from "@chakra-ui/react";
+import { Input, VStack, Button, Text, Heading, HStack } from "@chakra-ui/react";
+import { useAuth } from "../../contexts/auth";
+import { useEffect, useState } from "react";
+import {
+  useCheckout,
+  ADD_NEW_ADDDRESS,
+  CART,
+  ORDER_SUCCESSFULL,
+} from "../../contexts/checkout";
+import { useCart } from "../../contexts/cart";
+import axios from "axios";
+import { useRouter } from "next/router";
 
 export const Address = () => {
-  return (
-    <Formik
-      initialValues={{
-        mobile_number: "",
-        pin_code: "",
-        city: "",
-        state: "",
-        landmark: "",
-      }}
-      validate={(values) => {
-        const errors = {} as any;
-        if (!values.mobile_number) {
-          errors.email = "Required";
-        } else if (!values.pin_code) {
-          errors.pin_code = "Required";
+  const router = useRouter();
+  const { fetchUserSavedAddresses, addresses, fetchUserSavedOrders } =
+    useAuth();
+  const { setAddressId, addressId, setNavigation, reset } = useCheckout();
+  const [loading, setLoading] = useState(false);
+  const { cart } = useCart();
+
+  useEffect(() => {
+    (async () => {
+      if (addresses === null) await fetchUserSavedAddresses();
+    })();
+  }, []);
+
+  const placeOrder = async () => {
+    const body = {
+      totalAmount: cart.totalAmount,
+      addressId,
+      items: Object.values(cart.items),
+    };
+
+    setLoading(true);
+    try {
+      const { data } = await axios.post(
+        "http://localhost:4000/product/order",
+        body,
+        {
+          headers: {
+            Authorization: "Bearer " + localStorage.getItem("token"),
+          },
         }
-        return errors;
-      }}
-      onSubmit={async (values, { setSubmitting, setErrors }) => {}}
-    >
-      {({
-        values,
-        errors,
-        touched,
-        handleChange,
-        handleSubmit,
-        isSubmitting,
-      }) => (
-        <Form onSubmit={handleSubmit} style={{ width: "100%" }}>
-          <Input
-            name="mobile_number"
-            onChange={handleChange}
-            value={values.mobile_number}
-            borderColor={
-              errors.mobile_number && touched.mobile_number ? "red" : "#e8e8e8"
-            }
-            borderWidth="2px"
-            h="60px"
-            w="100%"
-          />
-          {errors.mobile_number && touched.mobile_number && (
-            <Text color="red">{errors.mobile_number}</Text>
-          )}
-          <Input
-            name="pin_code"
-            onChange={handleChange}
-            value={values.pin_code}
-            borderColor={
-              errors.pin_code && touched.pin_code ? "red" : "#e8e8e8"
-            }
-            borderWidth="2px"
-            h="60px"
-            w="100%"
-          />
-          {errors.pin_code && touched.pin_code && (
-            <Text color={"red"}>{errors.pin_code}</Text>
-          )}
+      );
 
-          <Input
-            name="city"
-            onChange={handleChange}
-            value={values.city}
-            borderColor={errors.city && touched.city ? "red" : "#e8e8e8"}
-            borderWidth="2px"
-            h="60px"
-            w="100%"
-          />
-          {errors.city && touched.city && (
-            <Text color={"red"}>{errors.city}</Text>
-          )}
+      await fetchUserSavedOrders();
+      reset();
+      router.replace(`/order/${data.data.orderId}`);
+    } catch (error) {}
+    setLoading(false);
+  };
 
-          <Input
-            name="state"
-            onChange={handleChange}
-            value={values.state}
-            borderColor={errors.state && touched.state ? "red" : "#e8e8e8"}
-            borderWidth="2px"
-            h="60px"
-            w="100%"
-          />
-          {errors.state && touched.state && (
-            <Text color={"red"}>{errors.state}</Text>
-          )}
+  return (
+    <VStack w="100%">
+      <Button onClick={() => setNavigation(CART)}>back</Button>
+      <Heading>Saved Address</Heading>
+      {addresses?.map((address: any) => (
+        <VStack
+          p="40px"
+          w="100%"
+          justifyContent={"space-between"}
+          border={
+            addressId === address.id ? "1px solid #0c4ff7" : "1px solid #e8e8e8"
+          }
+          _hover={{
+            border: "1px solid #0c4ff7",
+          }}
+          onClick={() => setAddressId(address.id)}
+        >
+          <HStack w="100%" justifyContent={"space-between"}>
+            <Text fontSize={"20px"} fontWeight={500}>
+              mobile_number:
+            </Text>
+            <Text fontSize={"20px"} fontWeight={500}>
+              {address.mobile_number}
+            </Text>
+          </HStack>
 
-          <Input
-            name="landmark"
-            onChange={handleChange}
-            value={values.landmark}
-            borderColor={
-              errors.landmark && touched.landmark ? "red" : "#e8e8e8"
-            }
-            borderWidth="2px"
-            h="60px"
-            w="100%"
-          />
-          {errors.landmark && touched.landmark && (
-            <Text color={"red"}>{errors.landmark}</Text>
-          )}
+          <HStack w="100%" justifyContent={"space-between"}>
+            <Text fontSize={"20px"} fontWeight={500}>
+              pin_code:
+            </Text>
+            <Text fontSize={"20px"} fontWeight={500}>
+              {" "}
+              {address.pin_code}
+            </Text>
+          </HStack>
 
-          <Button
-            isLoading={isSubmitting}
-            type="submit"
-            bg="#0c4ff7"
-            color={"white"}
-            w="100%"
-            fontSize={"22px"}
-            _hover={{
-              opacity: ".8",
-            }}
-            py={"30px"}
-            mt={"80px"}
-          >
-            Submit
-          </Button>
-        </Form>
+          <HStack w="100%" justifyContent={"space-between"}>
+            <Text fontSize={"20px"} fontWeight={500}>
+              city:
+            </Text>
+            <Text fontSize={"20px"} fontWeight={500}>
+              {address.city}
+            </Text>
+          </HStack>
+
+          <HStack w="100%" justifyContent={"space-between"}>
+            <Text fontSize={"20px"} fontWeight={500}>
+              state:
+            </Text>
+            <Text fontSize={"20px"} fontWeight={500}>
+              {address.state}
+            </Text>
+          </HStack>
+
+          <HStack w="100%" justifyContent={"space-between"}>
+            <Text fontSize={"20px"} fontWeight={500}>
+              landmark:
+            </Text>
+            <Text fontSize={"20px"} fontWeight={500}>
+              {address.landmark}
+            </Text>
+          </HStack>
+        </VStack>
+      ))}
+
+      {addressId && (
+        <Button
+          isLoading={loading}
+          type="submit"
+          bg="#0c4ff7"
+          color={"white"}
+          w="100%"
+          fontSize={"22px"}
+          _hover={{
+            opacity: ".8",
+          }}
+          py={"30px"}
+          mt={"80px"}
+          onClick={placeOrder}
+        >
+          Place order
+        </Button>
       )}
-    </Formik>
+
+      <Button
+        type="submit"
+        w="100%"
+        fontSize={"22px"}
+        _hover={{
+          opacity: ".8",
+        }}
+        py={"30px"}
+        mt={"80px"}
+        onClick={() => setNavigation(ADD_NEW_ADDDRESS)}
+      >
+        Add new address
+      </Button>
+    </VStack>
   );
 };

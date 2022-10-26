@@ -1,10 +1,10 @@
 import { VStack, Image, Heading, Button, HStack, Text } from "@chakra-ui/react";
 import { useCart } from "../../contexts/cart";
-import { useCheckout } from "../../contexts/checkout";
+import { useCheckout, ADDRESSES } from "../../contexts/checkout";
 
 export const Cart = () => {
   const { cart } = useCart();
-  const { proceedNavigation } = useCheckout();
+  const { setNavigation } = useCheckout();
   return (
     <VStack
       py="40px"
@@ -45,7 +45,7 @@ export const Cart = () => {
             Total discount
           </Text>
           <Text fontSize={"22px"} fontWeight={600}>
-            $ 500
+            $ 0
           </Text>
         </HStack>
 
@@ -60,7 +60,7 @@ export const Cart = () => {
             To pay
           </Text>
           <Text fontSize={"25px"} fontWeight={700}>
-            $ 500
+            $ {cart.totalAmount}
           </Text>
         </HStack>
 
@@ -73,7 +73,7 @@ export const Cart = () => {
             opacity: ".8",
           }}
           py={"30px"}
-          onClick={proceedNavigation}
+          onClick={() => setNavigation(ADDRESSES)}
         >
           Purchase
         </Button>
