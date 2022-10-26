@@ -48,7 +48,7 @@ export const login = async (
   next: NextFunction
 ) => {
   const { email, password } = req.body;
-  console.log("password :", password);
+
   if (!email || !password) {
     return next(
       new errorResponse.ErrorResponse("Required fields not provided", 400)
@@ -56,11 +56,13 @@ export const login = async (
   }
 
   try {
-    const user = await db.query(
+    let user = await db.query(
       `select * from dbms_project_user where email='${email}'`
     );
 
-    if (!user?.[0]) {
+    user = user?.[0];
+
+    if (!user) {
       return res.status(401).json({
         success: false,
         errors: [
@@ -72,7 +74,7 @@ export const login = async (
       });
     }
 
-    if (user?.[0].password !== password) {
+    if (user.password !== password) {
       return res.status(401).json({
         success: false,
         errors: [
@@ -90,6 +92,56 @@ export const login = async (
         user,
         token: helpers.getSignedToken(user.id),
       },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getSavedAddresses = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  // @ts-ignore
+  const userId = req.user.id;
+
+  try {
+    let result = await db.query(
+      `select * from dbms_project_user_addresses where userId=${userId};`
+    );
+
+    res.status(200).json({
+      success: true,
+      data: result,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const addNewAddress = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  // @ts-ignore
+  const userId = req.user.id;
+  const { mobile_number, pin_code, city, state, landmark } = req.body;
+  if (!mobile_number || !pin_code || !city || !state || !landmark) {
+    new errorResponse.ErrorResponse("Required fields not provided", 400);
+  }
+
+  try {
+    let result = await db.query(
+      `Insert into dbms_project_user_addresses
+      (userId, mobile_number, pin_code, city, state, landmark)
+      values(${userId},'${mobile_number}','${pin_code}','${city}','${state}','${landmark}');`
+    );
+
+    res.status(200).json({
+      success: true,
+      data: result,
     });
   } catch (error) {
     next(error);
