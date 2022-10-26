@@ -98,6 +98,17 @@ export const login = async (
   }
 };
 
+export const me = async (req: Request, res: Response, next: NextFunction) => {
+  // @ts-ignore
+  const user = req.user;
+  res.status(200).json({
+    success: true,
+    data: {
+      user,
+    },
+  });
+};
+
 export const getSavedAddresses = async (
   req: Request,
   res: Response,

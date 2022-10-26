@@ -1,7 +1,7 @@
 import express from "express";
 import db from "./db.config";
 import {errorHandler} from './middleware/error';
-
+import cors from "cors"
 // Routes
 import authRouter from "./routes/auth"
 import productRouter from "./routes/product"
@@ -15,7 +15,7 @@ db.initialize()
   });
  
 const app = express();
-
+app.use(cors())
 app.use(express.json());
 
 app.use("/auth", authRouter);
