@@ -1,8 +1,10 @@
 import { VStack, Image, Heading, Button, HStack, Text } from "@chakra-ui/react";
 import { useCart } from "../../contexts/cart";
+import { useCheckout } from "../../contexts/checkout";
 
 export const Cart = () => {
   const { cart } = useCart();
+  const { proceedNavigation } = useCheckout();
   return (
     <VStack
       py="40px"
@@ -71,6 +73,7 @@ export const Cart = () => {
             opacity: ".8",
           }}
           py={"30px"}
+          onClick={proceedNavigation}
         >
           Purchase
         </Button>
