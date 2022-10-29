@@ -1,10 +1,34 @@
 import { VStack, Image, Heading, Button, HStack, Text } from "@chakra-ui/react";
+import { useState } from "react";
 import { useCart } from "../../contexts/cart";
 import { useCheckout, ADDRESSES } from "../../contexts/checkout";
+import { useToast } from "@chakra-ui/react";
 
 export const Cart = () => {
-  const { cart } = useCart();
+  const toast = useToast()
+  const [loading, setLoading] = useState(false)
+  const { cart, removeItemFromCart, fetchCartItems } = useCart();
   const { setNavigation } = useCheckout();
+
+  const handleRemoveRequest = async (itemId:string)=>{
+    setLoading(true);
+
+    try {
+      await removeItemFromCart(itemId);
+      await fetchCartItems()
+    } catch (error) {
+      toast({
+        title: "Something went wrong",
+        description: "Please refresh or try again later",
+        status: "error",
+        duration: 9000,
+        isClosable: true,
+      });
+    }
+    
+    setLoading(false);
+  }
+
   return (
     <VStack
       py="40px"
@@ -74,6 +98,7 @@ export const Cart = () => {
           }}
           py={"30px"}
           onClick={() => setNavigation(ADDRESSES)}
+          disabled={!(Object.keys(cart.items).length > 0)}
         >
           Purchase
         </Button>
@@ -102,6 +127,8 @@ export const Cart = () => {
                   opacity: ".8",
                 }}
                 py={"20px"}
+                isLoading={loading}
+                onClick={() => handleRemoveRequest(id)}
               >
                 Remove
               </Button>

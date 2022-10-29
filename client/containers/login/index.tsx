@@ -3,6 +3,7 @@ import { Formik, Form } from "formik";
 import { Input, VStack, Button, Text, Heading } from "@chakra-ui/react";
 import axios from "axios";
 import { useAuth } from "../../contexts/auth";
+import validationSchema from "./validate"
 
 export const Login = () => {
   const { login, isAuthenticated, currentUser, logout } = useAuth();
@@ -34,33 +35,30 @@ export const Login = () => {
           <Heading fontSize={"23px"}>Log in</Heading>
           <Formik
             initialValues={{ email: "", password: "" }}
-            validate={(values) => {
-              const errors = {} as any;
-              if (!values.email) {
-                errors.email = "Required";
-              } else if (
-                !/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(values.email)
-              ) {
-                errors.email = "Invalid email address";
-              }
-              return errors;
-            }}
+            validationSchema={validationSchema}
             onSubmit={async (values, { setSubmitting, setErrors }) => {
               try {
                 const { data } = await axios.post(
                   "http://localhost:4000/auth/login",
                   {
-                    email: "rehan@gmail.com",
-                    password: "dsghjss",
+                    email: values.email,
+                    password: values.password,
                   }
                 );
-                console.log("user :", data.data);
+
                 if (!data) {
                   setErrors({ email: "Invalid crediantials" });
                 }
                 login(data.data);
-              } catch (error) {
-                console.log("error :", error);
+              } catch (error: any) {
+                let errors: Record<string, string> = {};
+
+                error.response.data.errors.forEach(
+                  (error: any) =>
+                    (errors[error.field as string] = error.message)
+                );
+
+                setErrors(errors);
               }
             }}
           >
@@ -83,6 +81,7 @@ export const Login = () => {
                   borderWidth="2px"
                   h="60px"
                   w="100%"
+                  placeholder="email"
                 />
                 {errors.email && touched.email && (
                   <Text color="red">{errors.email}</Text>
@@ -98,6 +97,7 @@ export const Login = () => {
                   borderWidth="2px"
                   h="60px"
                   w="100%"
+                  placeholder="password"
                 />
                 {errors.password && touched.password && (
                   <Text color={"red"}>{errors.password}</Text>

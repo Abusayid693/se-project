@@ -38,7 +38,7 @@ export const Navigation = () => {
                 opacity: ".8",
               }}
             >
-              <Image src="/icons/cart.svg" /> {Object.keys(cart.items).length}
+              <Image src="/icons/cart.svg" /> {cart.totalItem}
             </Button>
           </Link>
           <Link href={"/orders"}>
@@ -52,7 +52,9 @@ export const Navigation = () => {
             {" "}
             <Button>Log in</Button>
           </Link>
+          <Link href={"/signup"}>
           <Button>Sign up</Button>
+          </Link>
         </HStack>
       )}
     </HStack>

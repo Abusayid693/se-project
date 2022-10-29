@@ -45,8 +45,8 @@ export const Address = () => {
       );
 
       await fetchUserSavedOrders();
+      await router.replace(`/order/${data.data.orderId}`);
       reset();
-      router.replace(`/order/${data.data.orderId}`);
     } catch (error) {}
     setLoading(false);
   };

@@ -3,6 +3,7 @@ import { useCart } from "../../contexts/cart";
 import { useCheckout, ADDRESSES } from "../../contexts/checkout";
 import { useAuth } from "../../contexts/auth";
 import { useEffect, useState } from "react";
+import Link from "next/link";
 
 export const Orders = () => {
   const { orders, fetchUserSavedOrders } = useAuth();
@@ -37,12 +38,14 @@ export const Orders = () => {
         ) : (
           <>
             {orders?.map((item: any) => (
+              
               <HStack
                 alignItems={"center"}
                 border="1px solid #e8e8e8"
                 pb="10px"
                 w="100%"
                 position={"relative"}
+                
               >
                 <Image src={"/images/product.webp"} mx="auto" maxH="250px" />
                 <VStack w="100%" px={"20px"} alignItems={"flex-end"}>
@@ -51,7 +54,12 @@ export const Orders = () => {
                     {item.description}
                   </Heading>
                   <Heading fontSize={"22px"}>$ {item.price}</Heading>
+                  <Link href={`/order-item/${item.id}`}>
+                  <Button>details</Button></Link>
+                 
+                  <Link href={`/order/${item.orderId}`}>
                   <Text position={"absolute"} top={'10px'} right="10px" >Order id: {item.orderId}</Text>
+                  </Link>
                 </VStack>
               </HStack>
             ))}

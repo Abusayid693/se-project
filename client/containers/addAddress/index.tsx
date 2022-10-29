@@ -2,10 +2,15 @@ import { Formik, Form } from "formik";
 import { Input, VStack, Button, Text, Heading, HStack } from "@chakra-ui/react";
 import { useAuth } from "../../contexts/auth";
 import { useCheckout, ADDRESSES, CART } from "../../contexts/checkout";
+import validationSchema from "./validate";
+import axios from "axios";
+import { useToast } from "@chakra-ui/react";
 
 export const AddAddress = () => {
-  const { fetchUserSavedAddresses, addresses } = useAuth();
-  const {  setNavigation } = useCheckout();
+  const { fetchUserSavedAddresses } = useAuth();
+  const { setNavigation } = useCheckout();
+  const toast = useToast()
+
   return (
     <VStack w="100%">
       <Button onClick={() => setNavigation(ADDRESSES)}>back</Button>
@@ -17,16 +22,37 @@ export const AddAddress = () => {
           state: "",
           landmark: "",
         }}
-        validate={(values) => {
-          const errors = {} as any;
-          if (!values.mobile_number) {
-            errors.email = "Required";
-          } else if (!values.pin_code) {
-            errors.pin_code = "Required";
+        validationSchema={validationSchema}
+        onSubmit={async (values, { setSubmitting, setErrors }) => {
+          try {
+            await axios.post(
+              "http://localhost:4000/auth/addNewAddress",
+              {
+                mobile_number: values.mobile_number,
+                pin_code : values.pin_code,
+                city : values.city,
+                state: values.state,
+                landmark: values.landmark,
+              },
+              {
+                headers: {
+                  Authorization: "Bearer " + localStorage.getItem("token"),
+                },
+              }
+            );
+
+            await fetchUserSavedAddresses()
+            setNavigation(ADDRESSES)
+          } catch (error) {
+            toast({
+              title: 'Something went wrong',
+              description: "Please refresh or try again later",
+              status: 'error',
+              duration: 9000,
+              isClosable: true,
+            })
           }
-          return errors;
         }}
-        onSubmit={async (values, { setSubmitting, setErrors }) => {}}
       >
         {({
           values,
