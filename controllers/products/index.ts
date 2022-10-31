@@ -98,3 +98,195 @@ export const orderedItems = async (
     next(error);
   }
 };
+
+
+export const getOrderedItemDetails = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) =>{
+  const {orderItemId} = req.body;
+
+  if (!orderItemId) {
+    return next(
+      new errorResponse.ErrorResponse("Required fields not provided", 400)
+    );
+  }
+
+  try {
+    const details = await db.query(`select      
+    dbms_project_products.name,
+    dbms_project_products.description,
+    dbms_project_products.price,
+    dbms_project_products.image_link,
+
+    dbms_project_user_addresses.mobile_number,
+    dbms_project_user_addresses.pin_code,
+    dbms_project_user_addresses.city,
+    dbms_project_user_addresses.state,
+    dbms_project_user_addresses.landmark
+
+    from dbms_project_order_items
+
+    inner join dbms_project_products on
+    dbms_project_order_items.productId = dbms_project_products.id
+
+    inner join dbms_project_orders on
+    dbms_project_order_items.orderId = dbms_project_orders.id
+
+    inner join dbms_project_user_addresses
+    on dbms_project_orders.addressId = dbms_project_user_addresses.id
+
+    and dbms_project_order_items.id = ${orderItemId};`)
+
+    res.status(200).json({
+      success: true,
+      data: details,
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
+export const getOrderDetails = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const { orderId } = req.body;
+
+  if (!orderId) {
+    return next(
+      new errorResponse.ErrorResponse("Required fields not provided", 400)
+    );
+  }
+
+  try {
+    const order = await db.query(`
+    select 
+     dbms_project_orders.id,
+     dbms_project_orders.total_amount,
+     dbms_project_user_addresses.mobile_number,
+     dbms_project_user_addresses.pin_code,
+     dbms_project_user_addresses.city,
+     dbms_project_user_addresses.state,
+     dbms_project_user_addresses.landmark
+
+     from dbms_project_orders
+     inner join dbms_project_user_addresses
+     on dbms_project_orders.addressId = dbms_project_user_addresses.id
+    and dbms_project_orders.id = "${orderId}";`);
+
+    const items = await db.query(`select 
+      dbms_project_products.name,
+      dbms_project_products.description,
+      dbms_project_products.price,
+      dbms_project_products.image_link
+       from  dbms_project_order_items 
+
+      inner join dbms_project_products on
+      dbms_project_order_items.productId = dbms_project_products.id
+      where orderId = "${orderId}";`);
+
+    res.status(200).json({
+      success: true,
+      data: {
+        order,
+        items
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const addProductToCart = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  // @ts-ignore
+  const userId = req.user.id;
+  const { itemId } = req.body;
+
+  if (!itemId) {
+    return next(
+      new errorResponse.ErrorResponse("Required fields not provided", 400)
+    );
+  }
+
+  try {
+    await db.query(
+      `Insert into dbms_project_user_cart(userId, productId)
+        values('${userId}','${itemId}');
+          `
+    );
+
+    res.status(200).json({
+      success: true,
+      data: `Item with id: ${itemId} successfully added to cart`,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const removeProductFromCart = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  // @ts-ignore
+  const userId = req.user.id;
+  const { itemId } = req.body;
+
+  if (!itemId) {
+    return next(
+      new errorResponse.ErrorResponse("Required fields not provided", 400)
+    );
+  }
+
+  try {
+    await db.query(
+      `delete from dbms_project_user_cart where userId = ${userId} AND productId= ${itemId};`
+    );
+
+    res.status(200).json({
+      success: true,
+      data: `Item with id: ${itemId} successfully removed from cart`,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getProductsFromCart = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  // @ts-ignore
+  const userId = req.user.id;
+
+  try {
+    const result = await db.query(`select dbms_project_products.id,
+        dbms_project_products.name,
+        dbms_project_products.description,
+        dbms_project_products.inventory,
+        dbms_project_products.price,
+        dbms_project_products.discount_percent,
+        dbms_project_products.image_link
+    from dbms_project_user_cart
+
+    inner join dbms_project_products 
+    on dbms_project_user_cart.productId = dbms_project_products.id
+    and dbms_project_user_cart.userId = ${userId};`);
+
+    res.status(200).json({
+      success: true,
+      data: result,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
