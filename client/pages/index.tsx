@@ -4,8 +4,7 @@ import { VStack } from "@chakra-ui/react"
 
 export default function Home() {
   return (
-    <VStack pt="50px">
-      <h1>Hello World</h1>
+    <VStack pt="130px" px="20px">
       <Products/>
     </VStack>
   )

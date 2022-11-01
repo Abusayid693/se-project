@@ -5,17 +5,17 @@ import { useCheckout, ADDRESSES } from "../../contexts/checkout";
 import { useToast } from "@chakra-ui/react";
 
 export const Cart = () => {
-  const toast = useToast()
-  const [loading, setLoading] = useState(false)
+  const toast = useToast();
+  const [loading, setLoading] = useState(false);
   const { cart, removeItemFromCart, fetchCartItems } = useCart();
   const { setNavigation } = useCheckout();
 
-  const handleRemoveRequest = async (itemId:string)=>{
+  const handleRemoveRequest = async (itemId: string) => {
     setLoading(true);
 
     try {
       await removeItemFromCart(itemId);
-      await fetchCartItems()
+      await fetchCartItems();
     } catch (error) {
       toast({
         title: "Something went wrong",
@@ -25,9 +25,9 @@ export const Cart = () => {
         isClosable: true,
       });
     }
-    
+
     setLoading(false);
-  }
+  };
 
   return (
     <VStack
@@ -120,7 +120,16 @@ export const Cart = () => {
               <Heading fontSize={"20px"} fontWeight={400}>
                 {cart.items[id].description}
               </Heading>
-              <Heading fontSize={"22px"}>$ {cart.items[id].price}</Heading>
+              <Heading
+                fontSize={"19px"}
+                opacity=".6"
+                textDecoration="line-through"
+              >
+                $ {cart.items[id].price}
+              </Heading>
+              <Heading fontSize={"22px"}>
+                $ {cart.items[id].buyingPrice}
+              </Heading>
               <Button
                 fontSize={"17px"}
                 _hover={{

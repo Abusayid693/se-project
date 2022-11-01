@@ -67,7 +67,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
       const totalItem =  data.data.length;
       let totalAmount = 0;
 
-      data.data.forEach((item: any) => (filteredData[item.id] = item, totalAmount+=item.price));
+      data.data.forEach((item: any) => (filteredData[item.id] = item, totalAmount+=item.buyingPrice));
 
       setCart((prev) => ({
         ...prev,

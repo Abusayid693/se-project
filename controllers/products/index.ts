@@ -10,9 +10,15 @@ export const get = async (req: Request, res: Response, next: NextFunction) => {
        `
     );
 
+    let mutatedResult: any[] = []
+    result.forEach((item:any)=>{
+      item["buyingPrice"] = Math.round(item.price * ( (100-item.discount_percent) / 100 ));
+      mutatedResult.push(item);
+    })
+
     res.status(200).json({
       success: true,
-      data: result,
+      data: mutatedResult,
     });
   } catch (error) {
     next(error);
@@ -39,11 +45,11 @@ export const order = async (
   let command_1 = `insert into dbms_project_orders values ("${orderId}", ${Number(
     userId
   )}, ${Number(addressId)}, ${Number(totalAmount)});`;
-  let command_2 = `insert into dbms_project_order_items (orderId, userId, productId) values `;
+  let command_2 = `insert into dbms_project_order_items (orderId, userId, productId, buyingPrice) values `;
 
   items.forEach(
     (item: any) =>
-      (command_2 += `("${orderId}", ${Number(userId)}, ${Number(item.id)}),`)
+      (command_2 += `("${orderId}", ${Number(userId)}, ${Number(item.id)}, ${Number(item.buyingPrice)}),`)
   );
 
   command_2 = command_2.substring(0, command_2.length - 1) + ";";
@@ -79,7 +85,7 @@ export const orderedItems = async (
       orderId,
       dbms_project_products.name,
       dbms_project_products.description,
-      dbms_project_products.price,
+      dbms_project_order_items.buyingPrice as price,
       dbms_project_products.image_link
       from  dbms_project_order_items 
 
@@ -117,7 +123,7 @@ export const getOrderedItemDetails = async (
     const details = await db.query(`select      
     dbms_project_products.name,
     dbms_project_products.description,
-    dbms_project_products.price,
+    dbms_project_order_items.buyingPrice as price,
     dbms_project_products.image_link,
 
     dbms_project_user_addresses.mobile_number,
@@ -180,7 +186,7 @@ export const getOrderDetails = async (
     const items = await db.query(`select 
       dbms_project_products.name,
       dbms_project_products.description,
-      dbms_project_products.price,
+      dbms_project_order_items.buyingPrice as price,
       dbms_project_products.image_link
        from  dbms_project_order_items 
 
@@ -268,7 +274,7 @@ export const getProductsFromCart = async (
   // @ts-ignore
   const userId = req.user.id;
 
-  try {
+  try { 
     const result = await db.query(`select dbms_project_products.id,
         dbms_project_products.name,
         dbms_project_products.description,
@@ -281,6 +287,13 @@ export const getProductsFromCart = async (
     inner join dbms_project_products 
     on dbms_project_user_cart.productId = dbms_project_products.id
     and dbms_project_user_cart.userId = ${userId};`);
+
+
+    let mutatedResult: any[] = []
+    result.forEach((item:any)=>{
+      item["buyingPrice"] = Math.round(item.price * ( (100-item.discount_percent) / 100 ));
+      mutatedResult.push(item);
+    })
 
     res.status(200).json({
       success: true,
