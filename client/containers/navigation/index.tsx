@@ -2,10 +2,18 @@ import { Button, Heading, HStack, Avatar, Text, Image } from "@chakra-ui/react";
 import Link from "next/link";
 import { useAuth } from "../../contexts/auth";
 import { useCart } from "../../contexts/cart";
+import {useCheckout} from "../../contexts/checkout"
 
 export const Navigation = () => {
   const { isAuthenticated, currentUser, logout } = useAuth();
-  const { cart } = useCart();
+  const { cart, restCart } = useCart();
+  const {reset} = useCheckout();
+
+  const handleLogout = ()=>{
+    logout();
+    restCart();
+    reset()
+  }
 
   return (
     <HStack
@@ -44,7 +52,7 @@ export const Navigation = () => {
           <Link href={"/orders"}>
           <Button >orders</Button>
           </Link>
-          <Button onClick={logout}>Log out</Button>
+          <Button onClick={handleLogout}>Log out</Button>
         </HStack>
       ) : (
         <HStack>

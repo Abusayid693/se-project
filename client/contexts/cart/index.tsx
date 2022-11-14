@@ -9,16 +9,18 @@ export function useCart() {
   return useContext(CartContext);
 }
 
+const initialState = {
+  totalAmount: 0,
+  totalItem: 0,
+  items: {},
+}
+
 export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
   const { isAuthenticated } = useAuth();
   const toast = useToast()
-  const [cart, setCart] = useState({
-    totalAmount: 0,
-    totalItem: 0,
-    items: {},
-  });
+  const [cart, setCart] = useState(initialState);
 
   useEffect(() => {
     (async () => {
@@ -37,6 +39,10 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
       }
     })();
   }, [isAuthenticated()]);
+
+  const restCart = ()=>{
+    setCart(initialState)
+  }
 
   const addItemToCart = async (itemId: string) => {
     try {
@@ -99,7 +105,8 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
     cart,
     addItemToCart,
     fetchCartItems,
-    removeItemFromCart
+    removeItemFromCart,
+    restCart
   };
 
   return <CartContext.Provider value={values}>{children}</CartContext.Provider>;
