@@ -25,7 +25,7 @@ export const protect = async (
     const decoded = jwt.verify(token, JWT_SECRET) as any;
     console.log("decoded :", decoded);
     let user = await db.query(
-      `select * from dbms_project_user where id=${decoded?.id};`
+      `select * from se_project_user where id=${decoded?.id};`
     );
     user = user?.[0];
     if (!user) {

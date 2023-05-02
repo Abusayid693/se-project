@@ -7,6 +7,8 @@ export const ADDRESSES = 1;
 export const ADD_NEW_ADDDRESS = 2;
 export const CONFIRM_ORDER = 3;
 export const ORDER_SUCCESSFULL = 4;
+export const PAYMENTS = 5;
+export const ADD_PAYMENT = 6;
 
 export function useCheckout() {
   return useContext(CheckoutContext);

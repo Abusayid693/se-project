@@ -6,11 +6,12 @@ import * as errorResponse from "../../utils/errorResponse";
 export const get = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const result = await db.query(
-      `select * from dbms_project_products;
+      `select * from se_project_products;
        `
     );
 
     let mutatedResult: any[] = []
+    
     result.forEach((item:any)=>{
       item["buyingPrice"] = Math.round(item.price * ( (100-item.discount_percent) / 100 ));
       mutatedResult.push(item);
@@ -32,9 +33,9 @@ export const order = async (
 ) => {
   //  @ts-ignore
   const userId = req.user.id;
-  const { totalAmount, items, addressId } = req.body;
+  const { totalAmount, items, addressId, paymentMethodId } = req.body;
 
-  if (!totalAmount || !items || !addressId) {
+  if (!totalAmount || !items || !addressId || !paymentMethodId) {
     return next(
       new errorResponse.ErrorResponse("Required fields not provided", 400)
     );
@@ -42,10 +43,10 @@ export const order = async (
 
   const orderId = uuidv4().toString();
 
-  let command_1 = `insert into dbms_project_orders values ("${orderId}", ${Number(
+  let command_1 = `insert into se_project_orders values ("${orderId}", ${Number(
     userId
-  )}, ${Number(addressId)}, ${Number(totalAmount)});`;
-  let command_2 = `insert into dbms_project_order_items (orderId, userId, productId, buyingPrice) values `;
+  )}, ${Number(addressId)}, ${Number(totalAmount)}, ${Number(paymentMethodId)});`;
+  let command_2 = `insert into se_project_order_items (orderId, userId, productId, buyingPrice) values `;
 
   items.forEach(
     (item: any) =>
@@ -81,18 +82,18 @@ export const orderedItems = async (
 
   try {
     let result = await db.query(
-      `select dbms_project_order_items.id, 
+      `select se_project_order_items.id, 
       orderId,
-      dbms_project_products.name,
-      dbms_project_products.description,
-      dbms_project_order_items.buyingPrice as price,
-      dbms_project_products.image_link
-      from  dbms_project_order_items 
+      se_project_products.name,
+      se_project_products.description,
+      se_project_order_items.buyingPrice as price,
+      se_project_products.image_link
+      from  se_project_order_items 
 
-      inner join dbms_project_products on
-      dbms_project_order_items.productId = dbms_project_products.id
+      inner join se_project_products on
+      se_project_order_items.productId = se_project_products.id
 
-      where dbms_project_order_items.userId = "${userId}" 
+      where se_project_order_items.userId = "${userId}" 
       order by orderId asc;`
     );
 
@@ -121,29 +122,29 @@ export const getOrderedItemDetails = async (
 
   try {
     const details = await db.query(`select      
-    dbms_project_products.name,
-    dbms_project_products.description,
-    dbms_project_order_items.buyingPrice as price,
-    dbms_project_products.image_link,
+    se_project_products.name,
+    se_project_products.description,
+    se_project_order_items.buyingPrice as price,
+    se_project_products.image_link,
 
-    dbms_project_user_addresses.mobile_number,
-    dbms_project_user_addresses.pin_code,
-    dbms_project_user_addresses.city,
-    dbms_project_user_addresses.state,
-    dbms_project_user_addresses.landmark
+    se_project_user_addresses.mobile_number,
+    se_project_user_addresses.pin_code,
+    se_project_user_addresses.city,
+    se_project_user_addresses.state,
+    se_project_user_addresses.landmark
 
-    from dbms_project_order_items
+    from se_project_order_items
 
-    inner join dbms_project_products on
-    dbms_project_order_items.productId = dbms_project_products.id
+    inner join se_project_products on
+    se_project_order_items.productId = se_project_products.id
 
-    inner join dbms_project_orders on
-    dbms_project_order_items.orderId = dbms_project_orders.id
+    inner join se_project_orders on
+    se_project_order_items.orderId = se_project_orders.id
 
-    inner join dbms_project_user_addresses
-    on dbms_project_orders.addressId = dbms_project_user_addresses.id
+    inner join se_project_user_addresses
+    on se_project_orders.addressId = se_project_user_addresses.id
 
-    and dbms_project_order_items.id = ${orderItemId};`)
+    and se_project_order_items.id = ${orderItemId};`)
 
     res.status(200).json({
       success: true,
@@ -170,28 +171,28 @@ export const getOrderDetails = async (
   try {
     const order = await db.query(`
     select 
-     dbms_project_orders.id,
-     dbms_project_orders.total_amount,
-     dbms_project_user_addresses.mobile_number,
-     dbms_project_user_addresses.pin_code,
-     dbms_project_user_addresses.city,
-     dbms_project_user_addresses.state,
-     dbms_project_user_addresses.landmark
+     se_project_orders.id,
+     se_project_orders.total_amount,
+     se_project_user_addresses.mobile_number,
+     se_project_user_addresses.pin_code,
+     se_project_user_addresses.city,
+     se_project_user_addresses.state,
+     se_project_user_addresses.landmark
 
-     from dbms_project_orders
-     inner join dbms_project_user_addresses
-     on dbms_project_orders.addressId = dbms_project_user_addresses.id
-    and dbms_project_orders.id = "${orderId}";`);
+     from se_project_orders
+     inner join se_project_user_addresses
+     on se_project_orders.addressId = se_project_user_addresses.id
+    and se_project_orders.id = "${orderId}";`);
 
     const items = await db.query(`select 
-      dbms_project_products.name,
-      dbms_project_products.description,
-      dbms_project_order_items.buyingPrice as price,
-      dbms_project_products.image_link
-       from  dbms_project_order_items 
+      se_project_products.name,
+      se_project_products.description,
+      se_project_order_items.buyingPrice as price,
+      se_project_products.image_link
+       from  se_project_order_items 
 
-      inner join dbms_project_products on
-      dbms_project_order_items.productId = dbms_project_products.id
+      inner join se_project_products on
+      se_project_order_items.productId = se_project_products.id
       where orderId = "${orderId}";`);
 
     res.status(200).json({
@@ -223,7 +224,7 @@ export const addProductToCart = async (
 
   try {
     await db.query(
-      `Insert into dbms_project_user_cart(userId, productId)
+      `Insert into se_project_user_cart(userId, productId)
         values('${userId}','${itemId}');
           `
     );
@@ -254,7 +255,7 @@ export const removeProductFromCart = async (
 
   try {
     await db.query(
-      `delete from dbms_project_user_cart where userId = ${userId} AND productId= ${itemId};`
+      `delete from se_project_user_cart where userId = ${userId} AND productId= ${itemId};`
     );
 
     res.status(200).json({
@@ -275,18 +276,18 @@ export const getProductsFromCart = async (
   const userId = req.user.id;
 
   try { 
-    const result = await db.query(`select dbms_project_products.id,
-        dbms_project_products.name,
-        dbms_project_products.description,
-        dbms_project_products.inventory,
-        dbms_project_products.price,
-        dbms_project_products.discount_percent,
-        dbms_project_products.image_link
-    from dbms_project_user_cart
+    const result = await db.query(`select se_project_products.id,
+        se_project_products.name,
+        se_project_products.description,
+        se_project_products.inventory,
+        se_project_products.price,
+        se_project_products.discount_percent,
+        se_project_products.image_link
+    from se_project_user_cart
 
-    inner join dbms_project_products 
-    on dbms_project_user_cart.productId = dbms_project_products.id
-    and dbms_project_user_cart.userId = ${userId};`);
+    inner join se_project_products 
+    on se_project_user_cart.productId = se_project_products.id
+    and se_project_user_cart.userId = ${userId};`);
 
 
     let mutatedResult: any[] = []

@@ -1,7 +1,7 @@
 import { VStack, Image, Heading, Button, HStack, Text } from "@chakra-ui/react";
 import { useState } from "react";
 import { useCart } from "../../contexts/cart";
-import { useCheckout, ADDRESSES } from "../../contexts/checkout";
+import { useCheckout, PAYMENTS } from "../../contexts/checkout";
 import { useToast } from "@chakra-ui/react";
 
 export const Cart = () => {
@@ -97,7 +97,7 @@ export const Cart = () => {
             opacity: ".8",
           }}
           py={"30px"}
-          onClick={() => setNavigation(ADDRESSES)}
+          onClick={() => setNavigation(PAYMENTS)}
           disabled={!(Object.keys(cart.items).length > 0)}
         >
           Purchase

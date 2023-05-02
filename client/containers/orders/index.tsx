@@ -1,6 +1,4 @@
 import { VStack, Image, Heading, Button, HStack, Text } from "@chakra-ui/react";
-import { useCart } from "../../contexts/cart";
-import { useCheckout, ADDRESSES } from "../../contexts/checkout";
 import { useAuth } from "../../contexts/auth";
 import { useEffect, useState } from "react";
 import Link from "next/link";
@@ -31,7 +29,7 @@ export const Orders = () => {
     >
       <VStack alignItems={"flex-start"} w="100%">
         <Heading fontSize={"28px"} mb="15px" mt="15px">
-          Ypur Orders
+          Your Orders
         </Heading>
         {loading ? (
           <Heading>Loading</Heading>

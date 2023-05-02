@@ -30,6 +30,7 @@ export const Address = () => {
       totalAmount: cart.totalAmount,
       addressId,
       items: Object.values(cart.items),
+      paymentMethodId: cart.paymentMethodId
     };
 
     setLoading(true);

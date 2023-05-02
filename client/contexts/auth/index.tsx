@@ -18,7 +18,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 }) => {
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [addresses, setAddresses] = useState(null);
-  const [orders, setOrders] = useState(null)
+  const [payments, setPayments] = useState({
+    isFetched:false,
+    data:[]
+  });
+  const [orders, setOrders] = useState(null);
 
   useEffect(() => {
     (async () => {
@@ -48,6 +52,33 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       setAddresses(data.data);
     } catch (error) {}
   };
+
+  const fetchUserpayments = async () => {
+    try {
+      const { data } = await axios.get("http://localhost:4000/auth/payments", {
+        headers: {
+          Authorization: "Bearer " + localStorage.getItem("token"),
+        },
+      });
+      setPayments({ isFetched:true , data:data.data});
+    } catch (error) {}
+  };
+
+  const addNewPaymentMethod  = async (cvv:string, card:string, expiry:string) => {
+    try {
+      await axios.post(
+        "http://localhost:4000/auth/addPayment",
+        { cvv, card, expiry },
+        {
+          headers: {
+            Authorization: "Bearer " + localStorage.getItem("token"),
+          },
+        }
+      );
+    } catch (error) {
+      throw error
+    }
+  }
 
   const fetchUserSavedOrders = async () => {
     try {
@@ -96,7 +127,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     fetchUserSavedAddresses,
     addresses,
     fetchUserSavedOrders,
-    orders
+    fetchUserpayments,
+    addNewPaymentMethod,
+    payments,
+    orders,
   };
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };

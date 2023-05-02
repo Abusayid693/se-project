@@ -13,36 +13,41 @@ const initialState = {
   totalAmount: 0,
   totalItem: 0,
   items: {},
-}
+  paymentMethodId: null,
+};
 
 export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
   const { isAuthenticated } = useAuth();
-  const toast = useToast()
+  const toast = useToast();
   const [cart, setCart] = useState(initialState);
 
   useEffect(() => {
     (async () => {
-      if (isAuthenticated()){
+      if (isAuthenticated()) {
         try {
-           await fetchCartItems();
+          await fetchCartItems();
         } catch (error) {
           toast({
-            title: 'Something went wrong',
+            title: "Something went wrong",
             description: "Please refresh or try again later",
-            status: 'error',
+            status: "error",
             duration: 9000,
             isClosable: true,
-          })
+          });
         }
       }
     })();
   }, [isAuthenticated()]);
 
-  const restCart = ()=>{
-    setCart(initialState)
-  }
+  const restCart = () => {
+    setCart(initialState);
+  };
+
+  const setPaymentMethodId = (paymentMethodId: any) => {
+    setCart((prev) => ({ ...prev, paymentMethodId }));
+  };
 
   const addItemToCart = async (itemId: string) => {
     try {
@@ -55,7 +60,9 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
           },
         }
       );
-    } catch (error) {throw error}
+    } catch (error) {
+      throw error;
+    }
   };
 
   const fetchCartItems = async () => {
@@ -70,22 +77,27 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
       );
 
       const filteredData: Record<string, any> = {};
-      const totalItem =  data.data.length;
+      const totalItem = data.data.length;
       let totalAmount = 0;
 
-      data.data.forEach((item: any) => (filteredData[item.id] = item, totalAmount+=item.buyingPrice));
+      data.data.forEach(
+        (item: any) => (
+          (filteredData[item.id] = item), (totalAmount += item.buyingPrice)
+        )
+      );
 
       setCart((prev) => ({
         ...prev,
         ["items"]: filteredData,
         totalItem,
-        totalAmount
+        totalAmount,
       }));
-    } catch (error) {throw error}
+    } catch (error) {
+      throw error;
+    }
   };
 
-
-  const removeItemFromCart = async (itemId: string)=>{
+  const removeItemFromCart = async (itemId: string) => {
     try {
       await axios.post(
         "http://localhost:4000/product/removeProductFromCart",
@@ -97,16 +109,17 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
         }
       );
     } catch (error) {
-      throw error
+      throw error;
     }
-  }
+  };
 
   const values = {
     cart,
     addItemToCart,
     fetchCartItems,
     removeItemFromCart,
-    restCart
+    restCart,
+    setPaymentMethodId,
   };
 
   return <CartContext.Provider value={values}>{children}</CartContext.Provider>;
